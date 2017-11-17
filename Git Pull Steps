@@ -1,0 +1,15 @@
+git clone http://git.imobdev.com/web-group/moawadcom.git /var/www/html/moawadcom
+
+cd /var/www/html/moawadcom
+
+git config --global user.name "Devangi Nirmal"
+
+git config --global user.email "devangi.nirmal@imobdev.com"
+
+git checkout developer
+
+git config --global push.default matching
+
+git config merge.conflictstyle diff3
+
+git config merge.pin.driver true
