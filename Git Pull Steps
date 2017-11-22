@@ -1,3 +1,33 @@
+
+
+
+1)hb user not root
+2)ssh-keygen -t rsa -C "your_email@example.com" => Email should be LDAP
+3)cat < ~/.ssh/id_rsa.pub => It will show public key
+4)cd /var/www/html
+5)git clone git@192.168.34.240:web.php/hirebase_system_development_004115.git
+6)cd hirebase_system_development_004115/
+7)git status
+8)git checkout dev
+9)git status
+10)git pull origin dev
+11)git checkout -b "dn_review"
+12)git status
+13)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 git clone http://git.imobdev.com/web-group/moawadcom.git /var/www/html/moawadcom
 
 cd /var/www/html/moawadcom
