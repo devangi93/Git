@@ -1,0 +1,10 @@
+git add --all
+git branch 
+git commit -m "edit job"
+git checkout dev
+git pull origin dev 
+git checkout dn_review 
+git rebase dev  or git rebase --continue
+git push origin dn_review 
+
+
