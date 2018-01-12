@@ -1,0 +1,119 @@
+SELECT * , sum(datediff( `jobseeker_experience`.`dToDate` , `jobseeker_experience`.`dFromDate`)) AS DateDiff
+FROM `jobseeker`
+JOIN `jobseeker_experience` ON `jobseeker_experience`.`iJobseekerId` = `jobseeker`.`iJobseekerId`
+WHERE `jobseeker`.`iJobseekerId` =1
+GROUP BY `jobseeker`.`iJobseekerId`
+LIMIT 0 , 30
+
+
+
+SELECT p.vposttitle                          AS post_title, 
+       p.ipostid                             AS post_id, 
+       i.iinboxid                            AS inbox_id, 
+       i.ifromid                               AS sender_user_id, 
+       i.itoid                                 AS reciever_user_id, 
+       i.vsubject                              AS subject, 
+       concat_ws(' ',u.vfirstname,u.vlastname) AS sender_user_name, 
+       u.etitle                                AS etitle, 
+       u.vdesignation                          AS vdesignation, 
+       u.vprofiletype                          AS vprofiletype, 
+       u.vcity                                 AS vcity, 
+       u.vstate                                AS vstate, 
+       u.vcountry                              AS vcountry, 
+       u.iusertype                             AS iusertype, 
+       u.iusertype                             AS sender_user_type, 
+       u.vprofilepicture                       AS sender_user_photo,
+	u.iIndustryVerticalForEducator,
+	u.iIndustryVerticalForGuestSpeaker,
+       etype, 
+       ideletedbyid, 
+	d.vDepartmentTitle as departmentname,
+       u.iusermasterid                     AS users_id, 
+       i.tcomment                          AS message, 
+       i.imaininboxid                      AS main_inbox_id, 
+       i2.tcomment                         AS last_message , 
+       ifnull(i2.iinboxid, i.iinboxid)     AS last_message_id, 
+       ifnull(i2.ifromid, i.ifromid)       AS last_message_by, 
+       ifnull(i2.daddeddate, i.daddeddate) AS last_msged_date, 
+       ( 
+              SELECT count(i3.iinboxid) 
+              FROM   inbox i3 
+              WHERE  i3.imaininboxid = i.iinboxid 
+              AND    i3.itoid = '129' 
+              AND    eread = 'No' 
+              AND    etype = 'Active') AS total_unread_msgs, 
+       ( 
+              SELECT count(i4.iinboxid) 
+              FROM   inbox i4 
+              WHERE  i4.imaininboxid = i.iinboxid 
+              AND    i4.itoid = '129' 
+              AND    etype = 'Active' 
+              AND    i4.ideletedbyid <> '129') AS total_messages_count, 
+       ( 
+              SELECT count(iinboxid) 
+              FROM   inbox 
+              WHERE  imaininboxid = 0 
+              AND    ( 
+                            ifromid = '129' 
+                     OR     itoid = '129' ) 
+              AND    ideletedbyid <> '129') AS thread_count ,IF(i.ifromid = '129', i.itoid, i.ifromid) as end_msged_user_id FROM inbox i 
+LEFT JOIN `user_master` `u` ON
+IF(`i`.`itoid` = '129', `u`.`iusermasterid` = `i`.`ifromid`, `u`.`iusermasterid` = `i`.`itoid`) LEFT OUTER JOIN
+( 
+         SELECT   iinboxid, 
+                  tcomment, 
+                  ifromid, 
+                  daddeddate, 
+                  imaininboxid 
+         FROM     inbox inb 
+         WHERE    ( 
+                           ifromid = '129' 
+                  OR       itoid = '129' 
+                  AND      etype = 'Active' ) 
+         AND      ideletedbyid <> '129' 
+         ORDER BY daddeddate DESC) AS i2 ON i2.imaininboxid = i.iinboxid 
+left JOIN post AS p on p.ipostid = i.ipostid WHERE ((i.ifromid = '129'     OR     i.itoid = '129' ) AND   IF('' = '', 1, i.iinboxid = '')   AND  IF('' = '', 1, ( concat(u.vfirstname, ' ', u.vlastname) LIKE ( '%%' ) ))   AND   i.imaininboxid = 0   AND   etype = 'Active' ) 
+left JOIN department_master AS d on if(u.iUserType=7,d.iDepartmentMasterId=u.iIndustryVerticalForEducator,
+d.iDepartmentMasterId = u.iIndustryVerticalForGuestSpeaker)
+
+GROUP BY i.iinboxid, i.itoid ORDER BY last_msged_date DESC
+
+
+
+
+
+
+
+
+SELECT `um`.`iPostId` AS `um_post_id`,`um`.`vPostTitle` AS `um_post_title`,`um`.`dtPostActiveTill` AS `um_post_active_till`,`um1`.`eTitle` AS `um1_title`,`um1`.`vFirstName` AS `um1_first_name`,`um1`.`vLastName` AS `um1_last_name`,`dm`.`vDepartmentTitle` AS `dm_department_title_1`,`um2`.`vUniversityName` AS `um2_university_name`,`um1`.`vProfilePicture` AS `um1_profile_picture`,`um1`.`iUserMasterId` AS `um1_user_master_id`,`um`.`vCountry` AS `um_country`,`um`.`vState` AS `um_state`,`um`.`vCity` AS `um_city` FROM `post` AS `um` LEFT JOIN `user_master` AS `um1` ON `um`.`iPostedBy` = `um1`.`iUserMasterId`  WHERE `um`.`eStatus` IN('Active') AND UNIX_TIMESTAMP(um.dtPostActiveTill) >= UNIX_TIMESTAMP
+(Now()) AND (um1.vFirstName LIKE  '%%'  OR um1.vLastName LIKE '%%'  ) AND dm.iDepartmentMasterId LIKE '%%' AND um2.iUniversityMasterId LIKE '%%' AND um.vTags LIKE '%%'   ORDER BY `um1`.`vFirstName` ASC  LIMIT 15
+
+(um1.vFirstName LIKE  '%{%REQUEST.name%}%'  OR um1.vLastName LIKE '%{%REQUEST.name%}%'  ) 
+AND dm.iDepartmentMasterId LIKE '%{%REQUEST.industry_vertical_id%}%' 
+AND um2.iUniversityMasterId LIKE '%{%REQUEST.university_id%}%' 
+AND um.vTags LIKE '%{%REQUEST.keyword%}%' 
+
+
+
+
+
+
+
+if(tam.vFrom LIKE "%T3%",tam.vFrom,CONCAT_WS(" ",ufrom.vFirstName,ufrom.vLastName))
+if(tam.vTo LIKE "%T3%",tam.vTo,CONCAT_WS(" ",uto.vFirstName,uto.vLastName))
+tam.vFrom
+tam.vTo
+
+if(tam.vFrom = "T3 Virtual",if(tam.vTo LIKE "%T3%",tam.vTo,CONCAT_WS(" ",uto.vFirstName,uto.vLastName)),if(tam.vFrom LIKE "%T3%",tam.vFrom,CONCAT_WS(" ",ufrom.vFirstName,ufrom.vLastName)))
+
+
+
+FIND_IN_SET (t.iTechnologyId,"{%REQUEST.p_technology_id%}")
+{%REQUEST.p_technology_id%}
+
+
+
+
+
+
+
