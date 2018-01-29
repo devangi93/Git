@@ -117,3 +117,81 @@ FIND_IN_SET (t.iTechnologyId,"{%REQUEST.p_technology_id%}")
 
 
 
+
+
+
+
+
+
+SELECT z.*, 
+       ( z.dealer_count1 - z.tot_dealer_order ) AS dealer_count 
+FROM   (SELECT u.iuserid                                  AS user_id, 
+               Ifnull(t1.tot_dealer_order, 0)             AS tot_dealer_order, 
+               Concat(u.vfirstname, "", u.vlastname)     distributor_name, 
+               u.iuserid                                  AS dist_user_id, 
+               (SELECT Count(u1.iuserid) 
+                FROM   users AS u1 
+                WHERE  u1.idistributoruserid = u.iuserid) AS dealer_count1 
+        FROM   users AS u 
+               LEFT JOIN (SELECT o.idistributoruserid, 
+               Count(DISTINCT o.idistributoruserid, o.idealeruserid) 
+               AS 
+                                            tot_dealer_order 
+                          FROM   order_master AS o 
+                          WHERE  o.epaymentstatus = 'Paid' 
+                                 AND o.estatus = 'Booked' 
+                                 AND ( IF('' != '' && '' != '', ( 
+                                       o.dbookingdate BETWEEN '' AND 
+                                       '' ), 
+                                       ( 
+                                             o.dbookingdate BETWEEN 
+                                             Date_format(Now(), '%Y-%m-01') AND 
+                                             Curdate() ) 
+                                       ) ) 
+                          GROUP  BY o.idistributoruserid 
+                          ORDER  BY o.idistributoruserid, 
+                                    o.idealeruserid) AS t1 
+                      ON t1.idistributoruserid = u.iuserid 
+        WHERE  u.iusertype = 3 
+               AND u.estatus = 'Active' 
+               AND u.isysrecdeleted <> 1) AS z 
+WHERE  IF('' = '3', z.dist_user_id = '', z.dist_user_id LIKE '%%'); 
+
+
+
+SELECT u.* FROM   users AS u
+		LEFT JOIN 
+		(SELECT count(o.iUserId) as tot_dealer_order
+                          FROM   order_master AS o 
+                          WHERE  o.epaymentstatus = 'Paid' 
+                                 AND o.estatus = 'Booked') AS t1
+		ON t1.iDealerUserId = u.iUserId
+	        WHERE  u.idistributoruserid = 14 AND u.iUserType=2
+
+
+SELECT u.* FROM   users AS u
+		LEFT JOIN 
+		(SELECT * FROM order_master AS o 
+                          WHERE  o.epaymentstatus = 'Paid' 
+                                 AND o.estatus = 'Booked') AS t1
+		ON t1.iDealerUserId = u.iUserId WHERE  u.idistributoruserid = 14 AND u.iUserType=2
+			
+	        
+
+SELECT u.*,CONCAT_WS(" ",u.vFirstName,u.vLastName) dealer_name ,o.*,COUNT(o.iBookingById) as total_order_count FROM   users AS u LEFT JOIN order_master as o ON o.iBookingById= u.iUserId AND o.epaymentstatus = 'Paid' AND o.estatus = 'Booked' GROUP BY u.iUserId HAVING u.idistributoruserid = '{%SESSION.iUserId%}' AND u.iUserType=2
+
+			
+	        
+
+
+
+
+
+
+
+
+
+
+
+
+
