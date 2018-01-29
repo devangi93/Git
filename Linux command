@@ -1,0 +1,6 @@
+1)locate
+	find any file in system with path
+	ex: locate php.ini
+2)one directory up
+	cd ../
+3)
